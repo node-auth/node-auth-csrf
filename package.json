@@ -2,7 +2,7 @@
   "name": "node-auth-csrf",
   "version": "0.1.0",
   "description": "csrf protection for express application",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
