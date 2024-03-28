@@ -1,0 +1,30 @@
+{
+  "name": "node-auth-csrf",
+  "version": "0.1.0",
+  "description": "csrf protection for express application",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/node-auth/node-auth-csrf.git"
+  },
+  "keywords": [
+    "csrf",
+    "node-auth"
+  ],
+  "author": "node-auth",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/node-auth/node-auth-csrf/issues"
+  },
+  "homepage": "https://github.com/node-auth/node-auth-csrf#readme",
+  "dependencies": {
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.12",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.4.3"
+  }
+}
