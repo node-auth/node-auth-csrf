@@ -43,7 +43,9 @@ function csrfProtection(secret) {
         /**
          * Initialize
         */
-        req.csrfProtection.generateToken = () => generateToken(secret);
+        req.csrfProtection = {
+            generateToken: () => generateToken(secret)
+        };
         /**
          * Get request handler
          */

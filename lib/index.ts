@@ -10,8 +10,8 @@ declare global {
     namespace Express {
         interface Request {
             csrfProtection: {
-                generateToken: () => string;
-                csrfToken: string;
+                generateToken?: () => string;
+                csrfToken?: string;
             };
         }
     }
@@ -58,7 +58,9 @@ function csrfProtection(secret: string) {
         /**
          * Initialize
         */
-        req.csrfProtection.generateToken = () => generateToken(secret);
+        req.csrfProtection = {
+            generateToken: () => generateToken(secret)
+        }
 
         /**
          * Get request handler

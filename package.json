@@ -1,6 +1,6 @@
 {
   "name": "node-auth-csrf",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "csrf protection for express application",
   "main": "dist/index.js",
   "scripts": {
@@ -16,6 +16,7 @@
   ],
   "author": "node-auth",
   "license": "MIT",
+  "registry": "https://registry.npmjs.org/",
   "bugs": {
     "url": "https://github.com/node-auth/node-auth-csrf/issues"
   },
