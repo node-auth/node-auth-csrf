@@ -1,10 +1,10 @@
 import crypto from 'crypto';
 import { Request, Response, NextFunction } from 'express';
 
-/**
- * I created this csrf protection based on my R&D
- * you can suggest an improvement for this
- */
+interface CSRFProtectionOptions {
+    secret: string;
+    tokenExpiration?: number; // Token expiration time in milliseconds (default: 1 minute)
+}
 
 declare global {
     namespace Express {
@@ -18,61 +18,64 @@ declare global {
 }
 
 /**
- * Generate csrf token
- * @returns token
+ * Generate CSRF token
+ * @param {string} secret 
+ * @returns {string} token
  */
 function generateToken(secret: string): string {
+    const randomBytes = crypto.randomBytes(16).toString('hex');
     const timestamp = Date.now().toString();
     const hash = crypto.createHmac('sha256', secret)
-        .update(timestamp)
+        .update(randomBytes + timestamp)
         .digest('hex');
     return `${timestamp}-${hash}`;
 }
 
 /**
- * Validate token
+ * Validate CSRF token
  * @param {string} token 
  * @param {string} secret 
- * @returns 
+ * @param {number} expiration 
+ * @returns {boolean} validity
  */
-function validateToken(token: string, secret: string) {
+function validateToken(token: string, secret: string, expiration: number): boolean {
     const [timestampStr, hash] = token.split('-');
     const timestamp = parseInt(timestampStr);
+    if (isNaN(timestamp)) return false;
+    
+    const currentTime = Date.now();
+    if (currentTime - timestamp > expiration) return false;
+
     const expectedHash = crypto.createHmac('sha256', secret)
-        .update(timestamp.toString())
+        .update(token)
         .digest('hex');
-    const threshold = 60 * 1000; // 1 minute expiration (adjust as needed)
-    const expired = Date.now() - timestamp > threshold;
-    return !expired && hash === expectedHash;
+    return hash === expectedHash;
 }
 
 /**
- * CSRF Protection
- * @param {*} req 
- * @param {*} res 
- * @param {*} next 
- * @returns 
+ * CSRF Protection middleware
+ * @param {CSRFProtectionOptions} options 
+ * @returns {RequestHandler} middleware
  */
-function csrfProtection(secret: string) {
+function csrfProtection(options: CSRFProtectionOptions) {
+    const { secret, tokenExpiration = 60 * 1000 } = options;
+
     return (req: Request, res: Response, next: NextFunction) => {
         /**
-         * Initialize
-        */
+         * Initialize csrfProtection object in request
+         */
         req.csrfProtection = {
             generateToken: () => generateToken(secret)
-        }
+        };
 
         /**
-         * Get request handler
+         * Generate token on GET requests
          */
         if (req.method === 'GET') {
-            // Generate token on GET requests
             const token = generateToken(secret);
             req.csrfProtection.csrfToken = token;
-            // Add token to response as cookie
-            res.cookie('__node-auth:x-csrf-token', token, { httpOnly: true });
-            // Optionally, add token to response as hidden form field (optional)
-            res.locals.csrfToken = token;
+            res.cookie('__node-auth:x-csrf-token', token, { httpOnly: true, secure: true });
+            res.locals.csrfToken = token; // Optionally, add token to response as hidden form field (optional)
         }
 
         /**
@@ -80,15 +83,16 @@ function csrfProtection(secret: string) {
          */
         if (req.method === 'POST' || req.method === 'PUT' || req.method === 'DELETE') {
             const submittedToken = req.headers['x-csrf-token'] as string;
-            if (!submittedToken || !validateToken(submittedToken, secret)) {
+            if (!submittedToken || !validateToken(submittedToken, secret, tokenExpiration)) {
                 return res.status(403).json({
                     success: false,
-                    message: 'Invalid request : csrf'
+                    message: 'Invalid request: CSRF token validation failed'
                 });
             }
         }
+
         next();
-    }
+    };
 }
 
-module.exports = { generateToken, csrfProtection };
+export { generateToken, csrfProtection };
