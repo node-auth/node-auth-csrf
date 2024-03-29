@@ -52,7 +52,7 @@ headers: {
 ```
 
 ### GUIDES
-<p>You can also use csrfProtection on specific route your group of route if you don't want to put it globally</p>
+<p>You can also use csrfProtection on specific route or route group if you don't want to put it globally</p>
 
 ```
 app.get('/protected', csrfProtection(process.env.CSRF_SECRET), (req, res) => {
